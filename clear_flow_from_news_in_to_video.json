@@ -1,0 +1,1182 @@
+{
+  "name": "clear flow from news in to video",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "**Парсинг-исследование новостей на Хакер Ньюс и создание Сценария** ",
+        "height": 820,
+        "width": 1820,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        860,
+        360
+      ],
+      "id": "34d2779c-cc63-4068-bb6b-220b8fa6f819",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "\n**Автоматический постинг в Тик Ток и Ютуб**",
+        "height": 580,
+        "width": 1060,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3580,
+        360
+      ],
+      "id": "9c53d2b4-0010-4786-931e-71781b201963",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=## 🎯 AI Agent Prompt — Viral Video Script\n\nPerform the following steps to create a short-form AI video script.  \nThe current date and time is **{{$now}}** — use it as a reference for all time-based filtering.\n\n---\n\n### STEP 1 — Choose Topic\n\nFetch up to 3 stories from Hacker News from the past 72 hours (relative to {{$now}})  \nthat match one or more of these keywords:\n\n**{{ $json.selected_keyword }}**\n\nThese are your candidate stories.\n\n---\n\n### STEP 2 — Select Best Story\n\nFrom the candidates, choose the one that is:\n\n- Highly upvoted or discussed  \n- Emotionally or technically surprising  \n- Relevant to startup founders, investors, or AI builders\n\nIf no relevant story is found, return:  \n**No article found**\n\n---\n\n### STEP 3 — Extract Article\n\nFrom the fetched article:\n\n- Use only the **title** and **main article body**  \n- Keep only the **first 3 top-level comments**  \n- Ignore all nested replies (children)  \n- Remove all formatting: HTML, markdown, code blocks  \n- If the article or comment block is longer than **1000 words**, summarize it in **3–4 plain sentences**  \n- Ensure the total input stays under **7500 characters**\n\n---\n\n### STEP 4 — Write Video Script (30–60 seconds, 230–360 words)\n\nWrite a monologue script that lasts **at least 30 seconds aloud**.  \nYou must write between **230 and 360 words** (minimum 950 characters).  \nThis script will be used for a spoken AI avatar video.\n\nStructure:\n\n1. **Hook (2 sentences):** grab attention with a bold fact, emotional tension, or surprising twist  \n2. **Reveal (1 sentence):** introduce the story  \n3. **Body (5–7 sentences):** explain what happened, what’s changing, and how it affects founders, builders, or investors. Include:\n   - a real quote, stat, or result  \n   - a before/after comparison  \n   - a relatable or risky implication  \n4. **CTA (1 sentence):**  \n   _Click \"Subscribe\" to stay ahead in the world of AI!_  \n\n---\n\n### STYLE GUIDE\n\n- Use simple, factual English (6th-grade reading level)  \n- Active voice only  \n- No greetings, rhetorical questions, or filler phrases  \n- Do **not** use:\n  - Adjectives or adverbs (e.g., lightning-fast, intuitive, modern, seamless)  \n  - Metaphors or vague marketing language  \n  - Phrases like: *Imagine…*, *What if…*, *In a world where…*\n\n- If your output is shorter than 130 words, revise and expand it before finishing.\n\n---\n\n### OUTPUT FORMAT\n\nReturn only the **spoken script** as plain text.  \n**Do not include any hashtags.** They will be added separately.  \nIf no valid story was found, return:  \n**No article found.**",
+        "options": {
+          "systemMessage": "=You are a content creation specialist.  \nYour task is to create a short-form article or video script based on provided sources.\n\nThe current date and time is **{{$now}}**.  \nUse this as a reference point for any time-based logic (e.g., \"last 24 hours\", \"this week\").  \nWhen relevant, mention the timing inside the text to reflect how fresh the news is.",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        700
+      ],
+      "id": "1b7a2c0c-8e2a-45c3-9b2c-f5cdbd4ed830",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "maxTokens": 2000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1800,
+        940
+      ],
+      "id": "5a25ffcf-7ae7-4905-818d-9b09ed164ed2",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "resource": "all",
+        "additionalFields": {
+          "keyword": "={{ $fromAI('Keyword', ``, 'string') }}",
+          "tags": [
+            "front_page"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.hackerNewsTool",
+      "typeVersion": 1,
+      "position": [
+        1960,
+        940
+      ],
+      "id": "60e57608-8633-4b1b-8925-d6303c93bea9",
+      "name": "Fetch HN Front Page"
+    },
+    {
+      "parameters": {
+        "articleId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Article_ID', ``, 'string') }}",
+        "additionalFields": {
+          "includeComments": true
+        }
+      },
+      "type": "n8n-nodes-base.hackerNewsTool",
+      "typeVersion": 1,
+      "position": [
+        2120,
+        940
+      ],
+      "id": "2cab66af-2903-48c2-a2c4-ebc3573dbd8f",
+      "name": "Fetch HN Article"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a content strategist.  \nYour task is to write a clear, structured video description in English based on the provided script.  \nThe current date and time is **{{$now}}** — use it when relevant.\n\n---\n\n### STEP 1 — Write Video Script (30–60 seconds, 100–200 words)\n\nWrite a monologue script that lasts **at least 30 seconds aloud**.  \nYou must write between **100 and 200 words** (minimum 950 characters).  \nThis script will be used for a spoken AI avatar video.\n\nStructure:\n\n1. **Hook (2 sentences):** grab attention with a bold fact, emotional tension, or surprising twist  \n2. **Reveal (1 sentence):** introduce the story  \n3. **Body (5–7 sentences):** explain what happened, what’s changing, and how it affects founders, builders, or investors. Include:\n   - a real quote, stat, or result  \n   - a before/after comparison  \n   - a relatable or risky implication  \n4. **CTA (1 sentence):**  \n   _Click \"Subscribe\" to stay ahead in the world of AI!_  \n\n---\n\n### STYLE GUIDE\n\n- Use simple, factual English (6th-grade reading level)  \n- Active voice only  \n- No greetings, rhetorical questions, or filler phrases  \n- Do **not** use:\n  - Adjectives or adverbs (e.g., lightning-fast, intuitive, modern, seamless)  \n  - Metaphors or vague marketing language  \n  - Phrases like: *Imagine…*, *What if…*, *In a world where…*\n\n- If your output is shorter than 100 words, revise and expand it before finishing.\n\n---\n\n### OUTPUT FORMAT\n\nReturn only the **spoken script** as plain text.  \n**Do not include any hashtags.** They will be added separately.  \nIf no valid story was found, return:  \n**No article found.**\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2360,
+        500
+      ],
+      "id": "d1ebe3da-6bcc-4f4b-97a3-8d3c694a6bf5",
+      "name": "Write Long Caption"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are writing a short, clear title for a video from the AAA C(H+A)RM project.\n\n---\n\n### CONTEXT\n\nThe video presents a specific AI-agent-based automation or result.  \nYour job is to generate a **2–5 word title** that captures the core idea or twist.\n\n---\n\n### INSTRUCTIONS\n\n- Only 2 to 5 words  \n- No brand names (e.g., AAA, HeyGen, ChatGPT)  \n- No filler: amazing, powerful, ultimate, etc.  \n- No vague words: insight, system, update  \n- No emojis, hashtags, or punctuation  \n- Style: practical, direct, concrete\n\n---\n\n### EXAMPLES\n\n- AI Replaces SDR  \n- Cold Email Killer  \n- Founder Clone  \n- Dealflow Agent  \n- 24/7 Outreach  \n- Digital Twin Sales\n\n---\n\n### OUTPUT\n\nFinal title only. No formatting, no explanation.\n\nIf title can’t be generated, return:  \n**No title generated.**\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2360,
+        700
+      ],
+      "id": "ace1c52f-a595-4eda-ab78-0012a6c6d437",
+      "name": "Write Title"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are writing a short description for a 30-second AI-powered video from the AAA C(H+A)RM project.\n\nYour task is to create a **public caption (max 400 characters total)** for platforms like Shorts, Reels, or Threads.\n\n---\n\n### STRUCTURE\n\n1. **Sentence 1:** Present the core result, twist, or transformation  \n2. **Sentence 2:** Add one key fact, quote, or stat  \n3. Add **up to 3 relevant hashtags** (separate line, not in main text)\n\n---\n\n### STYLE GUIDE\n\n- English only, 6th-grade level  \n- Clear, short sentences  \n- Active voice only  \n- No greetings, filler, adjectives, emojis, or hashtags in text  \n- Highlight a real-world automation or agent use-case  \n- Include number or concrete stat if possible  \n- Entire text must be **under 400 characters**\n\n---\n\n### HASHTAG CHOICES\n\n#ai #founders #automation #clones #dealflow #sales #growth #digitaltwin #agents #startup\n\n---\n\n### FAILSAFE\n\nIf input is missing, return:  \n**No short caption generated.**\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2360,
+        880
+      ],
+      "id": "61de4d21-8ec3-4000-870a-e3bde3adf6dd",
+      "name": "Write Short Caption"
+    },
+    {
+      "parameters": {
+        "content": "Integration with heygen and 11labs",
+        "height": 820,
+        "width": 860
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2700,
+        360
+      ],
+      "id": "4dde9b84-7a28-4557-b079-536e63237e9e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.heygen.com/v2/video/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $json.heygen_api_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"video_inputs\": [\n    {\n      \"character\": {\n        \"type\": \"avatar\",\n        \"avatar_id\": \"{{ $json.avatar_id }}\",\n        \"avatar_style\": \"normal\",\n        \"scale\": 1.0,\n        \"offset\": {\n          \"x\": 0.0,\n          \"y\": 0.0\n        },\n        \"matting\": false\n      },\n      \"voice\": {\n        \"type\": \"text\",\n        \"input_text\": {{ JSON.stringify($('Write Long Caption').item.json.message.content) }},\n        \"voice_id\": \"{{ $json.voice_id }}\",\n        \"speed\": 1.0,\n        \"pitch\": 50,\n        \"emotion\": \"Friendly\"\n      }\n    }\n  ],\n  \"background\": {\n    \"type\": \"color\",\n    \"value\": \"#FFFFFF\"\n  },\n  \"dimension\": {\n    \"width\": 720,\n    \"height\": 1280\n  },\n  \"caption\": true,\n  \"aspect_ratio\": \"9:16\",\n  \"title\": \"{{ $('Write Title').item.json.message.content }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2820,
+        480
+      ],
+      "id": "bcc591e6-d762-44b6-becd-04cbf82abece",
+      "name": "Create Avatar Video"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.video_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3020,
+        880
+      ],
+      "id": "edd9f816-6fa3-4aa3-87e8-a34159e0afa9",
+      "name": "Get Avatar Video"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.heygen.com/v1/video_status.get?video_id={{ $('Create Avatar Video').item.json.data.video_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Bearer ",
+              "value": "OTZlYzkyMmQ2MTRhNGIwNDliZTA5NTViMGJiOTEyZmQtMTc0NDAzNTc1MQ=="
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3180,
+        480
+      ],
+      "id": "3840273f-53d0-4626-ad22-cd34e97cd4ec",
+      "name": "Get Status Video"
+    },
+    {
+      "parameters": {
+        "amount": 8,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3020,
+        480
+      ],
+      "id": "52f86676-d794-428a-a1ac-8e5ab4bff06d",
+      "name": "Wait",
+      "webhookId": "bae009bb-0dc3-42f7-8fc2-2cfee2c603e1"
+    },
+    {
+      "parameters": {
+        "fileName": "output.mp4",
+        "options": {
+          "append": false
+        }
+      },
+      "name": "Save Video",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        3300,
+        880
+      ],
+      "id": "49193ccd-1da3-4776-bd9e-0aa0d280bed2",
+      "notes": "Save video file"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        940,
+        700
+      ],
+      "id": "310f16a3-542e-4e96-9c0a-89c9acdadc32",
+      "name": "Schedule 8am"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"keywords_list\": [\n    \"ai\",\n    \"ai assistant\",\n    \"web3\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        700
+      ],
+      "id": "98c7c238-83f1-48f7-b258-17425874e0da",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://elb-api.vizard.ai/hvizard-server-front/open-api/v1/project/create",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "VIZARDAI_API_KEY",
+              "value": "fake-vizard-api-key"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"lang\": \"en\",\n  \"preferLength\": [0],\n  \"videoUrl\": \"{{ $json.data.video_url }}\",\n  \"videoType\": 1,\n  \"ratioOfClip\": 1,\n  \"removeSilenceSwitch\": 1,\n  \"templateId\": 57659846,\n  \"subtitleSwitch\": 1,\n  \"headlineSwitch\": 1,\n  \"projectName\": \"Hacker News\",\n  \"ext\": \"mp4\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3640,
+        440
+      ],
+      "id": "304ac82c-2696-47ad-b751-b8312857c9d5",
+      "name": "Vizard create process",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "amount": 50
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3940,
+        440
+      ],
+      "id": "0b403e20-9d49-4f12-961d-c85b393f9f0d",
+      "name": "Wait1",
+      "webhookId": "bae009bb-0dc3-42f7-8fc2-2cfee2c603e1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://elb-api.vizard.ai/hvizard-server-front/open-api/v1/project/publish",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "VIZARDAI_API_KEY",
+              "value": "fake-vizard-api-key"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "finalVideoId",
+              "value": "={{ $json.videos[0].videoId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3660,
+        740
+      ],
+      "id": "7e1d2787-0145-4fc6-b1d9-aaf6f45c0213",
+      "name": "Vizard Publish Clips",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c7d30886-b6d8-4bbd-bf73-ea9dd50ac9b2",
+              "leftValue": "={{ $json.code }}",
+              "rightValue": 2000,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4440,
+        440
+      ],
+      "id": "bb97e9b5-83fa-4d59-ac86-b1781939f5dd",
+      "name": "If status video ready"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b8906005-199b-4b4e-9508-ee22b5c14104",
+              "leftValue": "={{ $json.data.video_url }}",
+              "rightValue": "null",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3340,
+        480
+      ],
+      "id": "2f45d880-d0c2-47b9-a013-83d68781b72d",
+      "name": "If status video null"
+    },
+    {
+      "parameters": {
+        "url": "=https://elb-api.vizard.ai/hvizard-server-front/open-api/v1/project/query/{{ $json.projectId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "VIZARDAI_API_KEY",
+              "value": "21077499fe144795b6a479008c08022d"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4200,
+        440
+      ],
+      "id": "ec88c0f2-e528-4e22-9d08-c811fc30ba5c",
+      "name": "Get Video url",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        700
+      ],
+      "id": "a1cd2a31-1588-4aab-ba77-afa5c51fbf35",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Получаем массив ключей\nconst keywords = $json.keywords_list;\n// Выбираем случайный индекс\nconst randomIndex = Math.floor(Math.random() * keywords.length);\n// Выбираем один ключ\nconst selectedKeyword = keywords[randomIndex];\n\n// Возвращаем объект с выбранным ключом\nreturn [{\n  json: {\n    \"selected_keyword\": selectedKeyword\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        700
+      ],
+      "id": "14128e4e-7624-40f9-9221-0cba5511554f",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "009d49b8-d3e5-4df0-968f-6ddb87c2c7d9",
+              "name": "selected_keyword",
+              "value": "={{ $json.selected_keyword }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1760,
+        700
+      ],
+      "id": "da2d3705-1f87-4173-a6bb-8569cd4590de",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Ups, no article for you today."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        400
+      ],
+      "id": "a2ffbb41-03cd-40c0-9e08-433f5b27f607",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8a6361b4-85f3-4b28-9020-36d2ae5556bd",
+              "leftValue": "={{ String($json.output) }}",
+              "rightValue": "=No article found",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1800,
+        480
+      ],
+      "id": "6ce74ce0-1796-4659-b157-1c57e3ff4d85",
+      "name": "No article"
+    },
+    {
+      "parameters": {
+        "chatId": "-1002816105701",
+        "text": "={{ $json.output }} Need your attention!!!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        400
+      ],
+      "id": "76b24a5f-3d7c-4654-b9ec-7462e07aaae3",
+      "name": "Send Error to Telegram",
+      "webhookId": "4a838f41-31ac-45bc-8ab6-00463b13d7bb"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        940,
+        460
+      ],
+      "id": "d0104326-2d63-481f-82ad-66aa439bd14e",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const errorData = $input.first().json;\n\n// Проверьте, существует ли объект errorData.error и его свойство message\nlet message = \"\";\nif (errorData.error && errorData.error.message) {\n  message = `Ошибка в workflow '${errorData.workflow.name}' на узле '${errorData.node}'\\nСообщение: ${errorData.error.message}`;\n} else {\n  message = `Ошибка в workflow '${errorData.workflow.name}' на узле '${errorData.node}'\\nСообщение отсутствует`;\n}\n\nreturn [{ json: { error_message: message } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        460
+      ],
+      "id": "8dacf38f-8d4f-4729-bc42-45f2c0ac1652",
+      "name": "Format Error Message"
+    },
+    {
+      "parameters": {
+        "chatId": "1712474014",
+        "text": "Я сломался, скорее чини",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        460
+      ],
+      "id": "6e331971-319c-4670-83ad-acfa5b3ce00b",
+      "name": "Send Error to Telegram1",
+      "webhookId": "4a838f41-31ac-45bc-8ab6-00463b13d7bb"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aef6e893-8e01-428a-9484-9bbf284d4e15",
+              "leftValue": "={{$json[\"error_message\"].toBoolean()}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1320,
+        460
+      ],
+      "id": "69b2b4ed-a8ba-4a9a-9973-5b4b8e845ace",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $('Write Title').item.json.message.content }}",
+        "regionCode": "US",
+        "categoryId": "25",
+        "binaryProperty": "=data",
+        "options": {
+          "description": "={{ $('Write Short Caption').item.json.message.content }}"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        4440,
+        740
+      ],
+      "id": "bef54543-85be-44ac-815c-c74df3d4345b",
+      "name": "Upload a video",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"heygen_api_key\": \"fake-heygen-api-key\",\n  \"avatar_id\": \"571d7d18153e49b2a827d2f883635882\",\n  \"voice_id\": \"f6ea82de7a054905bb356087e4b12d69\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2760,
+        880
+      ],
+      "id": "99ac8703-6278-4fe4-bfef-11f50fcc3ca6",
+      "name": "Setup Heygen"
+    },
+    {
+      "parameters": {
+        "fileName": "output.mp4",
+        "dataPropertyName": "=data",
+        "options": {
+          "append": true
+        }
+      },
+      "name": "Save Video1",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        4180,
+        740
+      ],
+      "id": "da810a21-dffb-437c-aed2-d0bc0a9d6553",
+      "notes": "Save video file"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.videos[0].videoUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3920,
+        740
+      ],
+      "id": "ced0801f-e5c8-4043-af16-df72edccca82",
+      "name": "Get Avatar Video1"
+    }
+  ],
+  "pinData": {
+    "Schedule 8am": [
+      {
+        "json": {
+          "timestamp": "2025-06-11T12:47:24.074554-04:00",
+          "Readable date": "June 11th 2025, 12:47:24 PM",
+          "Readable time": "12:47:24 PM",
+          "Day of week": "Wednesday",
+          "Year": "2025",
+          "Month": "June",
+          "Day of month": "11",
+          "Hour": "12",
+          "Minute": "47",
+          "Second": "24",
+          "Timezone": "America/New_York (UTC-04:00)"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch HN Front Page": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch HN Article": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "No article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Long Caption": {
+      "main": [
+        [
+          {
+            "node": "Write Title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Title": {
+      "main": [
+        [
+          {
+            "node": "Write Short Caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Short Caption": {
+      "main": [
+        [
+          {
+            "node": "Setup Heygen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Avatar Video": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Avatar Video": {
+      "main": [
+        [
+          {
+            "node": "Save Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Status Video": {
+      "main": [
+        [
+          {
+            "node": "If status video null",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Status Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Video": {
+      "main": [
+        [
+          {
+            "node": "Vizard create process",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule 8am": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vizard create process": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get Video url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If status video ready": {
+      "main": [
+        [
+          {
+            "node": "Vizard Publish Clips",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Avatar Video1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If status video null": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Avatar Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video url": {
+      "main": [
+        [
+          {
+            "node": "If status video ready",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No article": {
+      "main": [
+        [
+          {
+            "node": "Send Error to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Write Long Caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Error to Telegram": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Error Message": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Send Error to Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Heygen": {
+      "main": [
+        [
+          {
+            "node": "Create Avatar Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Video1": {
+      "main": [
+        [
+          {
+            "node": "Upload a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Avatar Video1": {
+      "main": [
+        [
+          {
+            "node": "Save Video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d2262728-99d2-409c-a9a7-a6e7050c53cd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "46e53c3d725f1d1f644ca76e6047891777a9795c98586e3146518ac556d97f7f"
+  },
+  "id": "LuhMnjp51cxa7fMX",
+  "tags": [
+    {
+      "name": "heygen+11labs",
+      "id": "tYZ3DoKNZOFz3eHe",
+      "createdAt": "2025-07-07T09:05:15.057Z",
+      "updatedAt": "2025-07-07T09:05:15.057Z"
+    }
+  ]
+}
